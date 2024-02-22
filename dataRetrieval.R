@@ -20,7 +20,6 @@ conm <- mongo(
   collection = "matches"
 )
 
-
 dutchmatches=conm$find(
   query = '{"competitionId":635}',
   fields = '{"label":1}'
@@ -40,6 +39,15 @@ dutchmatches <- dutchmatches %>% rowwise() %>% mutate(home=str_split(match," - "
 
 dutchmatches <- dutchmatches %>% rowwise() %>% mutate(homescore=str_split(score,"-")[[1]][1],
                         awayscore=str_split(score,"-")[[1]][2])
+dutchmatches <- dutchmatches %>% mutate(longinfo=paste0(match,"_",`_id`))
+
+allPasses <- allPasses[!is.na(allPasses$matchId), ]
+allPasses <- allPasses %>%  group_by(matchId) %>% mutate(
+  interval = cut(minute, 
+                 breaks = seq(0, max(minute, na.rm = TRUE) + 10, by = 10), 
+                 include.lowest = TRUE, 
+                 labels = FALSE)
+)
 
 dteams <- dutchmatches %>% select(home) %>% unique()
 # get testmatch
@@ -50,8 +58,4 @@ testMP <- testmatch %>% filter(type.primary == "pass")
 
 allTeams <- conm$find()
 allPasses <- readRDS("data/allPMP.rds")
-
-allTeams <- allPasses %>% filter(competitionId==692) %>% unique()
-
-
 
