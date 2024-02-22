@@ -41,6 +41,9 @@ dutchmatches <- dutchmatches %>% rowwise() %>% mutate(homescore=str_split(score,
                         awayscore=str_split(score,"-")[[1]][2])
 dutchmatches <- dutchmatches %>% mutate(longinfo=paste0(match,"_",`_id`))
 
+dteams <- dutchmatches %>% select(home) %>% unique()
+
+# wrangle passes
 allPasses <- allPasses[!is.na(allPasses$matchId), ]
 allPasses <- allPasses %>%  group_by(matchId) %>% mutate(
   interval = cut(minute, 
@@ -49,7 +52,6 @@ allPasses <- allPasses %>%  group_by(matchId) %>% mutate(
                  labels = FALSE)
 )
 
-dteams <- dutchmatches %>% select(home) %>% unique()
 # get testmatch
 
 testmatch <- fromJSON("data/evt_5360025.json", flatten = T)
