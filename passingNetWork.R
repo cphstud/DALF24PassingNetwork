@@ -39,7 +39,7 @@ server <- function(input, output, session) {
   
   output$passplot <- renderPlot({
     mval <- input$match
-    mval <- "Willem II - Feyenoord _ 5241741"
+    #mval <- "Willem II - Feyenoord _ 5241741"
     match <- str_split(mval,"_")
     mid <- match[[1]][2]
     teams <- match[[1]][1]
@@ -47,9 +47,9 @@ server <- function(input, output, session) {
     
     #home and away teams
     ht <- hamatch[[1]][1]
-    ht <- gsub(" ","",ht)
+    ht <- gsub(" $","",ht)
     at <- hamatch[[1]][2]
-    at <- gsub(" ","",at)
+    at <- gsub(" $","",at)
     mid <- gsub(" ","",mid)
     print(mid)
     allPM <- allPasses %>% filter(matchId==mid)
@@ -84,6 +84,19 @@ server <- function(input, output, session) {
       select(player.name,cnt,pass.recipient.name,mx,my,mrx,mry,team.name) %>%  unique()
     
     # now passplot
+    
+    df2=allPM1ct %>% filter(cnt > 3)
+    ggplot(df2) +
+      annotate_pitch() +
+      geom_segment(aes(x = mx, y = my, xend = mrx, yend = mry),size=df2$cnt/8)+
+      geom_point(aes(x=mx,y=my,color=df2$team.name), size=2)+
+      geom_point(aes(x=mrx,y=mry,color=df2$team.name), size=2)+
+      geom_text(aes(x=mx,y=my,label=player.name),color="blue",size=2,vjust=-2)+
+      geom_text(aes(x=mrx,y=mry,label=pass.recipient.name),color="red",size=2,vjust=2)+
+      theme_pitch() +
+      direction_label() +
+      ggtitle("Simple passmap", 
+              "ggsoccer example")
     
     
   })
