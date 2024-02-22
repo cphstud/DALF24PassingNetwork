@@ -22,7 +22,7 @@ conm <- mongo(
 
 
 dutchmatches=conm$find(
-  query = '{"competitionId":692}',
+  query = '{"competitionId":635}',
   fields = '{"label":1}'
 )
 
@@ -41,6 +41,7 @@ dutchmatches <- dutchmatches %>% rowwise() %>% mutate(home=str_split(match," - "
 dutchmatches <- dutchmatches %>% rowwise() %>% mutate(homescore=str_split(score,"-")[[1]][1],
                         awayscore=str_split(score,"-")[[1]][2])
 
+dteams <- dutchmatches %>% select(home) %>% unique()
 # get testmatch
 
 testmatch <- fromJSON("data/evt_5360025.json", flatten = T)

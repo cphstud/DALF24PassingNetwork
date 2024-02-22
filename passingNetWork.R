@@ -11,7 +11,7 @@ ui <- fluidPage(
     sidebarPanel(
       selectInput("team",
                   label = "Vælg hold",
-                  choices = NULL
+                  choices = dteams
                   ),
       selectInput("match",
                   label = "Vælg kamp",
@@ -28,7 +28,12 @@ ui <- fluidPage(
   )
 
 server <- function(input, output, session) {
-  
+  # hold i dropdown
+  observe({
+    tval <- input$team
+    choices <- dutchmatches %>% filter(home==tval) %>% select(label)
+    updateSelectInput(session, "match", choices = choices)
+  })
   
   
 }
