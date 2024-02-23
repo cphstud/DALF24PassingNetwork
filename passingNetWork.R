@@ -60,7 +60,7 @@ server <- function(input, output, session) {
     allPM1 <- allPM %>% filter(team.name==ht)
     allPM2 <- allPM %>% filter(team.name==at)
     # mean location for den som afleverer
-    allPM1gr <- allPM1 %>% group_by(player.name) %>% 
+    allPM1gr1 <- allPM1 %>% group_by(player.name) %>% 
       mutate(mx=mean(location.x),
              my=mean(location.y),
              )  %>% select(player.name,
@@ -71,6 +71,7 @@ server <- function(input, output, session) {
                           my,
                pass.endLocation.x,
                pass.endLocation.y,
+               interval,
                           team.name
                           ) %>% unique() 
     allPM1gr <- allPM1gr %>% group_by(pass.recipient.name) %>% mutate(
@@ -97,7 +98,6 @@ server <- function(input, output, session) {
       direction_label() +
       ggtitle("Simple passmap", 
               "ggsoccer example")
-    
     
   })
 }
