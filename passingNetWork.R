@@ -2,8 +2,8 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 library(ggsoccer)
-
-
+library(stringr)
+library(jsonlite)
 
 
 ui <- fluidPage(
@@ -29,6 +29,12 @@ ui <- fluidPage(
   )
 
 server <- function(input, output, session) {
+  dkMatch = fromJSON("data/3930162.json", flatten = T)
+  dkMPasses=dkMatch %>% filter(type.name=="Pass")
+  dkMPasses$location.x=unlist(lapply(dkMPasses$location, function(x) x[1]))
+  dkMPasses$location.y=unlist(lapply(dkMPasses$location, function(x) x[2]))
+  dkMPasses$pass.endLocation.x=unlist(lapply(dkMPasses$pass.end_location, function(x) x[1]))
+  dkMPasses$pass.endLocation.y=unlist(lapply(dkMPasses$pass.end_location, function(x) x[2]))
   # hold i dropdown
   observe({
     tval <- input$team
@@ -39,7 +45,7 @@ server <- function(input, output, session) {
   
   output$passplot <- renderPlot({
     mval <- input$match
-    #mval <- "Willem II - Feyenoord _ 5241741"
+    mval <- "Willem II - Feyenoord _ 5241741"
     match <- str_split(mval,"_")
     mid <- match[[1]][2]
     teams <- match[[1]][1]
@@ -47,12 +53,16 @@ server <- function(input, output, session) {
     
     #home and away teams
     ht <- hamatch[[1]][1]
+    ht <- "Denmark"
     ht <- gsub(" $","",ht)
     at <- hamatch[[1]][2]
     at <- gsub(" $","",at)
+    at <- "Slovenia"
     mid <- gsub(" ","",mid)
     print(mid)
     allPM <- allPasses %>% filter(matchId==mid)
+    allPM <- dkMPasses
+    #saveRDS(allPasses,"allPassesII.rds")
     
     # prep the dataframe
     
@@ -64,9 +74,9 @@ server <- function(input, output, session) {
       mutate(mx=mean(location.x),
              my=mean(location.y),
              )  %>% select(player.name,
-                          player.position,
+                          #player.position,
                           pass.recipient.name,
-                          pass.recipient.position,
+                          #pass.recipient.position,
                           mx,
                           my,
                pass.endLocation.x,
