@@ -1,3 +1,4 @@
+library(rsconnect)
 library(shiny)
 library(dplyr)
 library(ggplot2)
@@ -10,9 +11,14 @@ library(grid)
 ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
+      selectInput("matches",
+                  label = "vælg kamp",
+                  choices <- c("dkSlov", "dkUK", "dkSerb"),
+                  selected = "dkUK"
+                  ),
       selectInput("team",
-                  label = "Vælg hold",
-                  choices = c("Denmark","Slovenia"),
+                  label = "vælg hold",
+                  choices = c("Denmark","Slovenia","UK"),
                   selected = "Denmark"
                   ),
       numericInput("minutes",
@@ -31,24 +37,43 @@ ui <- fluidPage(
   )
 
 server <- function(input, output, session) {
+  dkSlov = fromJSON("data/3930162.json", flatten = T)
+  dkUK = fromJSON("data/dkgb.json", flatten = T)
+  dkSerb = fromJSON("data/dkserb.json", flatten = T)
+  #choices <- c("dkSlov", "dkUk", "dkSerb")
+  #choices <- c("dkSlov"="Slovenia", "dkUK"="England", "dkSerb"="Serbia")
+  #choices <- c("Option 1" = "value1", "Option 2" = "value2", "Option 3" = "value3")
+  
+  
   # manuel prep
-  dkMatch = fromJSON("data/3930162.json", flatten = T)
-  dkMPassesBU=dkMatch %>% filter(type.name=="Pass")
-  dkMPasses=dkMPassesBU
-  dkMPasses$location.x=unlist(lapply(dkMPasses$location, function(x) x[1]))
-  dkMPasses$location.y=unlist(lapply(dkMPasses$location, function(x) x[2]))
-  dkMPasses$pass.endLocation.x=unlist(lapply(dkMPasses$pass.end_location, function(x) x[1]))
-  dkMPasses$pass.endLocation.y=unlist(lapply(dkMPasses$pass.end_location, function(x) x[2]))
-  dkMPasses$pass.endLocation.y=unlist(lapply(dkMPasses$pass.end_location, function(x) x[2]))
-  dkMPasses <- dkMPasses %>% mutate(period=(minute %/% 10)+1)
-  ht <- "Denmark"
-  at <- "Slovenia"
+    #choices <- c("dkSlov"="Slovenia", "dkUK"="England", "dkSerb"="Serbia")
+    #choices <- c("dkSlov"="Slovenia", "dkUK"="England", "dkSerb"="Serbia")
+    # Here, we simulate fetching data with a static list of choices
+    # Update the selectInput choices dynamically
+    #updateSelectInput(session, "matches", choices = choices)
+  
+  #dkMatch = fromJSON("data/3930162.json", flatten = T)
   # mean location for den som afleverer
   
   output$passplot <- renderPlot({
-    tval <- input$minutes
+    tval <- as.integer(input$minutes)
     team <- input$team
     minpass <- input$mincount
+    test=as.character(input$matches)
+    print(test)
+    dkMatch=get(test)
+    dkMPassesBU=dkMatch %>% filter(type.name=="Pass")
+    dkMPasses=dkMPassesBU
+    dkMPasses$location.x=unlist(lapply(dkMPasses$location, function(x) x[1]))
+    dkMPasses$location.y=unlist(lapply(dkMPasses$location, function(x) x[2]))
+    dkMPasses$pass.endLocation.x=unlist(lapply(dkMPasses$pass.end_location, function(x) x[1]))
+    dkMPasses$pass.endLocation.y=unlist(lapply(dkMPasses$pass.end_location, function(x) x[2]))
+    dkMPasses$pass.endLocation.y=unlist(lapply(dkMPasses$pass.end_location, function(x) x[2]))
+    dkMPasses <- dkMPasses %>% mutate(period=(minute %/% 10)+1)
+    #ht <- "Denmark"
+    #tval <- 1
+    #team <- "Denmark"
+    #minpass <- 2
     
     dkMPassesG <- dkMPasses %>% filter(period==tval)
     allPM <- dkMPassesG
